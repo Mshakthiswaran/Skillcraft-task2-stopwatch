@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stopwatch</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            font-family: cursive;
+        }
+
+        .stopwatch {
+            text-align: center;
+            background: rgba(187, 50, 96, 0.106);
+            padding: 100px;
+            border-radius: 10px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        #display {
+            font-size: 48px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            color: #333;
+            letter-spacing: 50px;
+            animation: glow 1s ease-in-out infinite alternate;
+        }
+
+        .buttons button {
+            font-size: 16px;
+            padding: 10px 20px;
+            margin: 10px;
+            border:none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #007BFF;
+            color: white;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .buttons button:hover {
+            background-color:blueviolet;
+            transform: scale(1.1);
+        }
+
+        .buttons button:active {
+            transform: scale(1);
+        }
+
+        #laps {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        #laps div {
+            margin: 5px 0;
+            padding: 10px;
+            background: #eee;
+            border-radius: 5px;
+            animation: slideIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #007BFF, 0 0 20px #007BFF, 0 0 30px #007BFF; }
+            to { text-shadow: 0 0 20px #0056b3, 0 0 30px #0056b3, 0 0 40px #0056b3; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="stopwatch">
+        <h1>Stopwatch</h1>
+        <div id="display">00:00:00</div>
+        <div class="buttons">
+            <button id="startPause">Start</button>
+            <button id="reset">Reset</button>
+            <button id="lap">Lap</button>
+        </div>
+        <div id="laps"></div>
+    </div>
+    <script>
+        let startTime = 0;
+        let updatedTime = 0;
+        let difference = 0;
+        let timerInterval;
+        let running = false;
+        let laps = [];
+
+        const display = document.getElementById('display');
+        const startPauseBtn = document.getElementById('startPause');
+        const resetBtn = document.getElementById('reset');
+        const lapBtn = document.getElementById('lap');
+        const lapsContainer = document.getElementById('laps');
+
+        startPauseBtn.addEventListener('click', () => {
+            if (running) {
+                pauseTimer();
+            } else {
+                startTimer();
+            }
+        });
+
+        resetBtn.addEventListener('click', resetTimer);
+        lapBtn.addEventListener('click', recordLap);
+
+        function startTimer() {
+            if (!running) {
+                startTime = new Date().getTime() - difference;
+                timerInterval = setInterval(updateDisplay, 10);
+                startPauseBtn.textContent = 'Pause';
+                running = true;
+            }
+        }
+
+        function pauseTimer() {
+            if (running) {
+                clearInterval(timerInterval);
+                difference = new Date().getTime() - startTime;
+                startPauseBtn.textContent = 'Start';
+                running = false;
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            startTime = 0;
+            updatedTime = 0;
+            difference = 0;
+            running = false;
+            display.textContent = '00:00:00';
+            startPauseBtn.textContent = 'Start';
+            laps = [];
+            lapsContainer.innerHTML = '';
+        }
+
+        function updateDisplay() {
+            updatedTime = new Date().getTime() - startTime;
+            display.textContent = formatTime(updatedTime);
+        }
+
+        function formatTime(time) {
+            let milliseconds = parseInt((time % 1000) / 10);
+            let seconds = Math.floor((time / 1000) % 60);
+            let minutes = Math.floor((time / (1000 * 60)) % 60);
+
+            milliseconds = milliseconds < 10 ? '0' + milliseconds : milliseconds;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+
+            return `${minutes}:${seconds}:${milliseconds}`;
+        }
+
+        function recordLap() {
+            if (running) {
+                const lapTime = formatTime(new Date().getTime() - startTime);
+                laps.push(lapTime);
+                const lapElement = document.createElement('div');
+                lapElement.textContent = `Lap ${laps.length}: ${lapTime}`;
+                lapsContainer.appendChild(lapElement);
+            }
+        }
+    </script>
+</body>
+</html>
